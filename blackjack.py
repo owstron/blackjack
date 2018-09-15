@@ -7,7 +7,6 @@ class Card:
         self.initialValue = value
         self.fullName = fullName
     
-
 class Player:
     def __init__(self, name):
         self.name = name
@@ -18,11 +17,10 @@ class Player:
         self.totalPoints = 0
         for card in self.hand:
             if card.shortName == 'A':
-                while(True):
+                while (True):
                     card.chosenValue = eval(input('You have an Ace, do you want to value it to 1 or 10? '))
                     if card.chosenValue == 1 or card.chosenValue == 10:
                         break
-
             self.totalPoints += card.chosenValue
 
     def initialRound(self, deck):
@@ -42,7 +40,11 @@ class Dealer(Player):
     def __init__(self):
         Player.__init__(self, 'Dealer')
     
-    def calcTotalPoints(self, redo = False):
+    # Not sure what redo does here
+    # Perhaps you need a different strategy for picking the value of aces,
+    # like generating all possible permutations (since there may be two) and
+    # returning the one closest to 21.
+    def calcTotalPoints(self, redo=False):
         self.totalPoints = 0
         ace = ''
 
@@ -70,22 +72,22 @@ def initializeDeck():
     cards = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']
     names = ['Ace', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Jack', 'Queen', 'King']
     suits = ['Diamonds', 'Spades', 'Clubs', 'Hearts']
-    for i in range(0,len(cards)):
+    for i in range(0, len(cards)):
         card = cards[i]
         name = names[i]
         for suit in suits:
-            shortName = cards[i]
-            fullName = "{0} of {1}".format(name, suit)
-            if card in ['A', '10', 'J', 'Q', 'K']:
+            shortName = card
+            fullName = '{} of {}'.format(name, suit)
+            if card in ['A', 'J', 'Q', 'K']:
                 value = 10
             else:
                 value = int(card)
             deck.append(Card(shortName, value, fullName))
     return deck
 
-def initializePlayer(name = ''):
+def initializePlayer(name=''):
     if name == '':
-        name = input("Enter your Name:: ")
+        name = input('Enter your name: ')
     return Player(name)
 
 def Game():
@@ -100,7 +102,7 @@ def Game():
 
     print(f'\n----{player.name}\'s Turn-----')
     player.showHand()
-    while(True):
+    while (True):
         if player.totalPoints == 21:
             return 'Woohooo! BlackJack!! You win!!!'
         elif player.totalPoints > 21:
@@ -117,6 +119,7 @@ def Game():
             
     print('\n----Dealer\'s Turn----')
     dealer.showHand()
+    # When does this end?
     while(True):
         if dealer.totalPoints < 17:
             dealer.hit(deck)
@@ -131,5 +134,3 @@ def Game():
 
 prompt = Game()
 print(prompt)
-
-
