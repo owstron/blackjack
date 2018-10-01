@@ -1,5 +1,8 @@
 import random
 
+import sys
+
+
 class Card:
     def __init__(self, shortName, value, fullName):
         self.shortName = shortName
@@ -14,16 +17,21 @@ class Player:
         self.hand = []
         self.totalPoints = 0
     
-    def calcTotalPoints(self):
+    def calcTotalPoints(self, redo = False):
         self.totalPoints = 0
+        ace = ''
+
         for card in self.hand:
             if card.shortName == 'A':
-                while(True):
-                    card.chosenValue = eval(input('You have an Ace, do you want to value it to 1 or 10? '))
-                    if card.chosenValue == 1 or card.chosenValue == 10:
-                        break
-
+                ace = card
             self.totalPoints += card.chosenValue
+        
+        if ace != '' and not redo:
+            if self.totalPoints > 21:
+                ace.chosenValue = 1
+            else:
+                ace.chosenValue = 10
+            self.calcTotalPoints(True)
 
     def initialRound(self, deck):
         self.hand = [deck.pop() for _ in range(2)]
@@ -36,27 +44,11 @@ class Player:
         for card in self.hand:
             print(card.fullName)
         self.calcTotalPoints()
-        print(f'Your total points is:: {self.totalPoints}')
+        print(f'{self.name}\'s total points is:: {self.totalPoints}')
 
 class Dealer(Player):
     def __init__(self):
         Player.__init__(self, 'Dealer')
-    
-    def calcTotalPoints(self, redo = False):
-        self.totalPoints = 0
-        ace = ''
-
-        for card in self.hand:
-            if card.shortName == 'A':
-                ace = card
-            self.totalPoints += card.chosenValue
-        
-        if ace != '' and not redo:
-            if self.totalPoints >= 21:
-                ace.chosenValue = 1
-            else:
-                ace.chosenValue = random.choice([1, 10])
-            self.calcTotalPoints(True)
     
     def hit(self, deck):
         pickedCard = deck.pop()
@@ -81,18 +73,16 @@ def initializeDeck():
             else:
                 value = int(card)
             deck.append(Card(shortName, value, fullName))
-    return deck
+    return deck.copy()
 
 def initializePlayer(name = ''):
     if name == '':
         name = input("Enter your Name:: ")
     return Player(name)
 
-def Game():
-    deck = initializeDeck()
+def Game(deck, player):
     random.shuffle(deck)
 
-    player = initializePlayer()
     dealer = Dealer()
 
     player.initialRound(deck)
@@ -107,13 +97,16 @@ def Game():
             return 'Busted! You lose!!'
         else:
             choice = input('Do you want to hit(Y/N)?')
-            if (choice.upper() == 'Y'):
+            if choice.upper() == 'Y':
                 print('You chose to hit.')
                 player.hit(deck)
                 player.showHand()
-            else:
+            elif choice.upper() == 'N':
                 print('You chose to stand.')
                 break
+            else:
+                print('WRONG INPUT! Please enter either Y or N!!')
+                continue
             
     print('\n----Dealer\'s Turn----')
     dealer.showHand()
@@ -129,7 +122,13 @@ def Game():
             dealer.hit(deck)
             dealer.showHand()
 
-prompt = Game()
-print(prompt)
 
-
+if __name__ == '__main__':
+    if len(sys.argv) == 2:
+        player = Player(sys.argv[1])
+    else:
+        player = initializePlayer()
+    
+    deck = initializeDeck()
+    prompt = Game(deck, player)
+    print(prompt)
